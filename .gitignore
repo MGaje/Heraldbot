@@ -1,0 +1,9 @@
+config.json
+*-lock.json
+
+.vscode/
+build/
+dist/
+node_modules/
+db/
+env/
