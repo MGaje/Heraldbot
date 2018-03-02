@@ -10,9 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^11.3.0",
-    "mersenne-twister": "^1.1.0"
+    "mersenne-twister": "^1.1.0",
+    "winston": "^2.4.0"
   },
   "devDependencies": {
+    "@types/winston": "^2.3.8",
     "typescript": "^2.7.2"
   }
 }
