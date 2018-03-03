@@ -2,6 +2,7 @@ import * as Discord from "discord.js";
 import * as Winston from "winston";
 
 import { Config } from "./Config";
+import { MessageHandler } from "../handlers/MessageHandler";
 
 /**
  * Main bot construct.
@@ -11,6 +12,7 @@ export class Heraldbot
     public botClient: Discord.Client;
     public config: Config;
     public stdin: NodeJS.Socket;
+    public msgHandler: MessageHandler;
 
     /**
      * Default constructor.
@@ -27,6 +29,9 @@ export class Heraldbot
      */
     public async run(): Promise<void>
     {
+        Winston.log("debug", "Setting up handlers.");
+        this.setupHandlers();
+        
         Winston.log("debug", "Setting up event listeners.");
         this.setupListeners();
 
@@ -34,6 +39,15 @@ export class Heraldbot
         await this.botClient.login(this.config.botToken);
 
         Winston.log("debug", "Heraldbot is now running.");
+    }
+
+    /**
+     * Sets up all the handlers.
+     */
+    private setupHandlers()
+    {
+        Winston.log("debug", "Setting up Message Handler.");
+        this.msgHandler = new MessageHandler();
     }
     
     /**
@@ -47,6 +61,12 @@ export class Heraldbot
         this.botClient.on('ready', () =>
         {
             Winston.log("debug", "Connected to Discord.");
+        });
+
+        // Upon Discord server message.
+        this.botClient.on("message", message =>
+        {
+            this.msgHandler.handleMsg(message);
         });
 
         // Upon user elected termination.
