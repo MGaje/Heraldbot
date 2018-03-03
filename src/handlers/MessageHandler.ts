@@ -1,7 +1,7 @@
 import * as Discord from "discord.js";
 import * as Winston from "winston";
 
-import { Utility } from "./Utility";
+import { Utility } from "../core/Utility";
 
 /**
  * Handles Discord messages from users.
@@ -23,6 +23,8 @@ export class MessageHandler
      */
     public handleMsg(message: Discord.Message)
     {
+        // todo: remove this junk line. Was used to test random number generation with
+        // MT.
         Winston.log("debug", "rn: " + Utility.randomNumber(1, 6));
     }
 }

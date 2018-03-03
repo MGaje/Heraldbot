@@ -15,6 +15,6 @@ export class Utility
      */
     static randomNumber(min: number, max: number): number
     {
-        return this._numGen.random() * (max - min) + min;
+        return Math.floor(this._numGen.random() * (max - min) + min);
     }
 }
