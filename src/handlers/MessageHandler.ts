@@ -53,7 +53,21 @@ export class MessageHandler
 
         if (chance === 1)
         {
+            // HeraldBot speaks!
             this.sayRandomPhrase(message.channel as Discord.TextChannel);
+        }
+        else
+        {
+            // Potentially absorb new phrase.
+            const absorbChance: number = Utility.randomNumber(1, 5);
+            const absorbPer: number = Math.round(100 * (1 / 4));
+            Winston.log("debug", "Absorb chance: " + absorbChance + " (about " + absorbPer + "%).");
+
+            if (message.content.length > 0 && absorbChance === 1)
+            {
+                this.absorbPhrase(message.content);
+                Winston.log("debug", "Absorbed new phrase: " + message.content);
+            }
         }        
     }
 
@@ -65,5 +79,20 @@ export class MessageHandler
     {
         const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
         channel.send(corpus[Utility.randomNumber(0, corpus.length)]);
+    }
+
+    /**
+     * Add specified phrase to corpus.
+     * @param {string} phrase Phrase to be added to the corpus.
+     */
+    private absorbPhrase(phrase: string)
+    {
+        // Only update corpus contents if the phrase doesn't currently exist in it yet.
+        const corpusContents: string[] = this._dataStore.get(DataStoreKeys.Corpus);
+        if (!corpusContents.some(x => x.toLowerCase() === phrase.toLowerCase()))
+        {
+            corpusContents.push(phrase);
+            this._dataStore.set(DataStoreKeys.Corpus, corpusContents);
+        }
     }
 }
