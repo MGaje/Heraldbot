@@ -1,3 +1,6 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import * as Discord from "discord.js";
 import * as Winston from "winston";
 
@@ -33,6 +36,9 @@ export class Heraldbot
      */
     public async run(): Promise<void>
     {
+        Winston.log("debug", "Caching data.");
+        await this.cacheData();
+
         Winston.log("debug", "Setting up handlers.");
         this.setupHandlers();
         
@@ -43,6 +49,33 @@ export class Heraldbot
         await this._botClient.login(this._config.botToken);
 
         Winston.log("debug", "Heraldbot is now running.");
+    }
+
+    /** 
+     * Cache some data (probably just the corpus text). 
+     */
+    private cacheData(): Promise<void>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            // Set chance bound.
+            this._dataStore.set(DataStoreKeys.Chance, 36);
+
+            // Read corpus file and set contents.
+            fs.readFile(path.join(__dirname, "../../assets/corpus.txt"), "utf8", (err, contents) => 
+            {
+                if (err)
+                {
+                    reject(err);
+                }
+
+                const parsedContents: string[] = contents.split("\n");
+                this._dataStore.set(DataStoreKeys.Corpus, parsedContents);
+                resolve();
+            });
+        });
+        
+        
     }
 
     /**
@@ -64,9 +97,6 @@ export class Heraldbot
         // Upon successful Discord connection.
         this._botClient.on('ready', () =>
         {
-            const testCorpus: string[] = ["Statement 1", "Statement 2", "Statement 3", "Statement 4", "Statement 5"];
-            this._dataStore.set(DataStoreKeys.Corpus, testCorpus);
-
             Winston.log("debug", "Connected to Discord.");
         });
 
@@ -79,16 +109,28 @@ export class Heraldbot
             this._msgHandler.handleMsg(message);
         });
 
-        // Upon user elected termination.
+        // Upon user interaction.
         this._stdin.addListener("data", d =>
         {
             const input: string = d.toString().trim();
+
+            // Voluntary shutdown.
             if (input === "quit")
             {
                 this._stdin.removeAllListeners();
                 this._botClient.destroy();
 
                 process.exit();
+            }
+            // Setting the "chance" value, which determines how often HeraldBot will speak
+            // unprovoked directly.
+            else if (input.startsWith("chance"))
+            {
+                // Assumed format: "chance 35".
+                const parsedInput: string[] = input.split(" ");
+                this._dataStore.set(DataStoreKeys.Chance, parseInt(parsedInput[1]));
+                
+                Winston.log("debug", "Updated chance value to " + parsedInput[1]);
             }
         });
     }
