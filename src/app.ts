@@ -4,7 +4,7 @@ import { Heraldbot } from "./core/Heraldbot";
 
 // Configure Winston logger.
 Winston.configure({
-    level: process.env.LOG_LEVEL,
+    level: "debug",
     transports: [
         new Winston.transports.Console({
             colorize: true
