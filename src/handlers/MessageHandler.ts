@@ -78,7 +78,14 @@ export class MessageHandler
     private sayRandomPhrase(channel: Discord.TextChannel)
     {
         const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
-        channel.send(corpus[Utility.randomNumber(0, corpus.length)]);
+        let randomPhrase: string = corpus[Utility.randomNumber(0, corpus.length)];
+
+        if (Utility.randomNumber(1, 11) === 1)
+        {
+            randomPhrase = randomPhrase.toUpperCase();
+        }
+
+        channel.send(randomPhrase);
     }
 
     /**
