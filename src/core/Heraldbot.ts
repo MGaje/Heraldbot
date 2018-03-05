@@ -132,6 +132,12 @@ export class Heraldbot
                 
                 Winston.log("debug", "Updated chance value to " + parsedInput[1]);
             }
+            // Obtain current number of phrases in corpus.
+            else if (input.startsWith("count"))
+            {
+                const corpusContents: string[] = this._dataStore.get(DataStoreKeys.Corpus);
+                Winston.log("debug", "Phrase count: " + corpusContents.length);
+            }
         });
     }
 }
