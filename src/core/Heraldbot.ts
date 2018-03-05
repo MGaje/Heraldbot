@@ -49,6 +49,10 @@ export class Heraldbot
         await this._botClient.login(this._config.botToken);
 
         Winston.log("debug", "Heraldbot is now running.");
+
+        // Rewrite corpus file every hour.
+        setInterval(this.updateCorpusFile.bind(this), 3600000);
+        Winston.log("debug", "UpdateCorpusFile interval running."); 
     }
 
     /** 
@@ -76,6 +80,25 @@ export class Heraldbot
         });
         
         
+    }
+
+    /** 
+     * Rewrite corpus file with all phrases.
+     */
+    private updateCorpusFile()
+    {
+        const corpusContents: string[] = this._dataStore.get(DataStoreKeys.Corpus);
+        const corpusData: string = corpusContents.join("\n");
+
+        fs.writeFile(path.join(__dirname, "../../assets/corpus.txt"), corpusData, "utf8", err => 
+        {
+            if (err)
+            {
+                Winston.log("error", "An error occurred writing the corpus file.");
+            }
+
+            Winston.log("debug", "Corpus file written.");
+        });
     }
 
     /**
