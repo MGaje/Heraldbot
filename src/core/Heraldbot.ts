@@ -161,6 +161,11 @@ export class Heraldbot
                 const corpusContents: string[] = this._dataStore.get(DataStoreKeys.Corpus);
                 Winston.log("debug", "Phrase count: " + corpusContents.length);
             }
+            // Manually update corpus file.
+            else if (input.startsWith("update-corpus"))
+            {
+                this.updateCorpusFile();
+            }
         });
     }
 }
