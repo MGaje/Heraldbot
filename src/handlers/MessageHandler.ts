@@ -1,20 +1,24 @@
 import * as Discord from "discord.js";
 import * as Winston from "winston";
 
+import { DataStoreKeys } from "../core/constants";
 import { Utility } from "../core/Utility";
+import { DataStore } from "../core/DataStore";
 
 /**
  * Handles Discord messages from users.
  */
 export class MessageHandler
 {
+    private _dataStore: DataStore;
+
     /**
      * Default constructor.
      * @constructor
      */
-    constructor()
+    constructor(dataStore: DataStore)
     {
-        // Empty.
+        this._dataStore = dataStore;
     }
 
     /**
@@ -23,8 +27,8 @@ export class MessageHandler
      */
     public handleMsg(message: Discord.Message)
     {
-        // todo: remove this junk line. Was used to test random number generation with
-        // MT.
-        Winston.log("debug", "rn: " + Utility.randomNumber(1, 6));
+        // todo: Update logic to only have a chance of speaking.
+        const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
+        message.channel.sendMessage(corpus[Utility.randomNumber(0, corpus.length)]);
     }
 }

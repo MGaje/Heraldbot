@@ -1,18 +1,21 @@
 import * as Discord from "discord.js";
 import * as Winston from "winston";
 
+import { BotId, DataStoreKeys } from "./constants";
 import { Config } from "./Config";
 import { MessageHandler } from "../handlers/MessageHandler";
+import { DataStore } from "./DataStore";
 
 /**
  * Main bot construct.
  */
 export class Heraldbot
 {
-    public botClient: Discord.Client;
-    public config: Config;
-    public stdin: NodeJS.Socket;
-    public msgHandler: MessageHandler;
+    private _botClient: Discord.Client;
+    private _config: Config;
+    private _stdin: NodeJS.Socket;
+    private _msgHandler: MessageHandler;
+    private _dataStore: DataStore;
 
     /**
      * Default constructor.
@@ -20,8 +23,9 @@ export class Heraldbot
      */
     constructor()
     {
-        this.botClient = new Discord.Client();
-        this.config = require("../../config.json");
+        this._botClient = new Discord.Client();
+        this._dataStore = new DataStore();
+        this._config = require("../../config.json");
     }
 
     /**
@@ -36,7 +40,7 @@ export class Heraldbot
         this.setupListeners();
 
         Winston.log("debug", "Attempting to login.");
-        await this.botClient.login(this.config.botToken);
+        await this._botClient.login(this._config.botToken);
 
         Winston.log("debug", "Heraldbot is now running.");
     }
@@ -47,7 +51,7 @@ export class Heraldbot
     private setupHandlers()
     {
         Winston.log("debug", "Setting up Message Handler.");
-        this.msgHandler = new MessageHandler();
+        this._msgHandler = new MessageHandler(this._dataStore);
     }
     
     /**
@@ -55,28 +59,34 @@ export class Heraldbot
      */
     private setupListeners()
     {
-        this.stdin = process.openStdin();
+        this._stdin = process.openStdin();
 
         // Upon successful Discord connection.
-        this.botClient.on('ready', () =>
+        this._botClient.on('ready', () =>
         {
+            const testCorpus: string[] = ["Statement 1", "Statement 2", "Statement 3", "Statement 4", "Statement 5"];
+            this._dataStore.set(DataStoreKeys.Corpus, testCorpus);
+
             Winston.log("debug", "Connected to Discord.");
         });
 
         // Upon Discord server message.
-        this.botClient.on("message", message =>
+        this._botClient.on("message", message =>
         {
-            this.msgHandler.handleMsg(message);
+            // Ignore messages from itself.
+            if (message.author.id === BotId) return;
+            
+            this._msgHandler.handleMsg(message);
         });
 
         // Upon user elected termination.
-        this.stdin.addListener("data", d =>
+        this._stdin.addListener("data", d =>
         {
             const input: string = d.toString().trim();
             if (input === "quit")
             {
-                this.stdin.removeAllListeners();
-                this.botClient.destroy();
+                this._stdin.removeAllListeners();
+                this._botClient.destroy();
 
                 process.exit();
             }
