@@ -27,8 +27,13 @@ export class MessageHandler
      */
     public handleMsg(message: Discord.Message)
     {
-        // todo: Update logic to only have a chance of speaking.
-        const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
-        message.channel.sendMessage(corpus[Utility.randomNumber(0, corpus.length)]);
+        const chance: number = Utility.randomNumber(1, 36);
+        Winston.log("debug", "Chance: " + chance);
+
+        if (chance === 1)
+        {
+            const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
+            message.channel.send(corpus[Utility.randomNumber(0, corpus.length)]);
+        }        
     }
 }
