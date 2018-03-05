@@ -5,4 +5,5 @@ export const BotId: string = "418466140562522124";
 export class DataStoreKeys
 {
     public static Corpus: string = "corpus";
+    public static Chance: string = "chance";
 }

@@ -58,6 +58,10 @@ export class Heraldbot
     {
         return new Promise((resolve, reject) =>
         {
+            // Set chance bound.
+            this._dataStore.set(DataStoreKeys.Chance, 36);
+
+            // Read corpus file and set contents.
             fs.readFile(path.join(__dirname, "../../assets/corpus.txt"), "utf8", (err, contents) => 
             {
                 if (err)
@@ -105,16 +109,28 @@ export class Heraldbot
             this._msgHandler.handleMsg(message);
         });
 
-        // Upon user elected termination.
+        // Upon user interaction.
         this._stdin.addListener("data", d =>
         {
             const input: string = d.toString().trim();
+
+            // Voluntary shutdown.
             if (input === "quit")
             {
                 this._stdin.removeAllListeners();
                 this._botClient.destroy();
 
                 process.exit();
+            }
+            // Setting the "chance" value, which determines how often HeraldBot will speak
+            // unprovoked directly.
+            else if (input.startsWith("chance"))
+            {
+                // Assumed format: "chance 35".
+                const parsedInput: string[] = input.split(" ");
+                this._dataStore.set(DataStoreKeys.Chance, parseInt(parsedInput[1]));
+                
+                Winston.log("debug", "Updated chance value to " + parsedInput[1]);
             }
         });
     }

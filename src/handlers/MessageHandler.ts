@@ -27,8 +27,11 @@ export class MessageHandler
      */
     public handleMsg(message: Discord.Message)
     {
-        const chance: number = Utility.randomNumber(1, 36);
-        Winston.log("debug", "Chance: " + chance);
+        const chanceBound: number = this._dataStore.get(DataStoreKeys.Chance);
+        const chance: number = Utility.randomNumber(1, chanceBound);
+        const chancePer: number = Math.round(100 * (1 / (chanceBound - 1)));
+
+        Winston.log("debug", "Chance: " + chance + " (about " + chancePer + "%).");
 
         if (chance === 1)
         {
