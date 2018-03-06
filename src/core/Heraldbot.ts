@@ -8,6 +8,7 @@ import { BotId, DataStoreKeys } from "./constants";
 import { Config } from "./Config";
 import { MessageHandler } from "../handlers/MessageHandler";
 import { DataStore } from "./DataStore";
+import { Utility } from "./Utility";
 
 /**
  * Main bot construct.
@@ -58,28 +59,20 @@ export class Heraldbot
     /** 
      * Cache some data (probably just the corpus text). 
      */
-    private cacheData(): Promise<void>
+    private async cacheData(): Promise<void>
     {
-        return new Promise((resolve, reject) =>
-        {
-            // Set chance bound.
-            this._dataStore.set(DataStoreKeys.Chance, 36);
+        // Set static values.
+        this._dataStore.set(DataStoreKeys.Chance, 36);
 
-            // Read corpus file and set contents.
-            fs.readFile(path.join(__dirname, "../../assets/corpus.txt"), "utf8", (err, contents) => 
-            {
-                if (err)
-                {
-                    reject(err);
-                }
-
-                const parsedContents: string[] = contents.split("\n");
-                this._dataStore.set(DataStoreKeys.Corpus, parsedContents);
-                resolve();
-            });
-        });
+        // Read corpus file.
+        const parsedContents: string[] = (await Utility.readFile(path.join(__dirname, "../../assets/corpus.txt"))).split("\n");
+        this._dataStore.set(DataStoreKeys.Corpus, parsedContents);
+        Winston.log("debug", "Parsed corpus file.");
         
-        
+        // Read whitelist file.
+        const parsedWhitelist: string[] = (await Utility.readFile(path.join(__dirname, "../../assets/whitelist.txt"))).split("\n").map(x => x.trim());
+        this._dataStore.set(DataStoreKeys.Whitelist, parsedWhitelist);
+        Winston.log("debug", "Parsed whitelist file.");
     }
 
     /** 

@@ -9,4 +9,5 @@ export class DataStoreKeys
 {
     public static Corpus: string = "corpus";
     public static Chance: string = "chance";
+    public static Whitelist: string = "whitelist";
 }
