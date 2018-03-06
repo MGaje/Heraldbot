@@ -73,7 +73,6 @@ export class MessageHandler
             if (message.content.length > 0 && absorbChance === 1)
             {
                 this.absorbPhrase(message.content);
-                Winston.log("debug", "Absorbed new phrase: " + message.content);
             }
         }        
     }
@@ -107,6 +106,7 @@ export class MessageHandler
         {
             corpusContents.push(phrase);
             this._dataStore.set(DataStoreKeys.Corpus, corpusContents);
+            Winston.log("debug", "Absorbed new phrase: " + phrase);
         }
     }
 }
