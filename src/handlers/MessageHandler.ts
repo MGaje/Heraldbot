@@ -27,6 +27,13 @@ export class MessageHandler
      */
     public handleMsg(message: Discord.Message)
     {
+        // If the message wasn't sent in a whitelisted channel, don't bother doing anything else.
+        const whitelist: string[] = this._dataStore.get(DataStoreKeys.Whitelist);
+        if (!whitelist.some(x => x === message.channel.id))
+        {
+            return;
+        }
+
         const normalizedContent: string = message.content.toLowerCase();
         if (normalizedContent === "hi heraldbot!")
         {

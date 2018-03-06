@@ -1,3 +1,5 @@
+import * as fs from "fs";
+
 import * as MersenneTwister from "mersenne-twister";
 
 /**
@@ -13,8 +15,30 @@ export class Utility
      * @param {number} max Upper bound.
      * @return {number} randomly generated number.
      */
-    static randomNumber(min: number, max: number): number
+    public static randomNumber(min: number, max: number): number
     {
         return Math.floor(this._numGen.random() * (max - min) + min);
+    }
+
+    /**
+     * Node.js' fs readFile in promise form.
+     * @param {string} file File to open.
+     * @returns {Promise<any>} Promise with the contents of the file.
+     */
+    public static readFile(file: string): Promise<string>
+    {
+        return new Promise((resolve, reject) => 
+        {
+            // Read corpus file and set contents.
+            fs.readFile(file, "utf8", (err, contents) => 
+            {
+                if (err)
+                {
+                    reject(err);
+                }
+
+                resolve(contents);
+            });
+        });
     }
 }
