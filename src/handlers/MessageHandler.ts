@@ -1,5 +1,6 @@
 import * as Discord from "discord.js";
 import * as Winston from "winston";
+import nodespeak = require("nodespeak");
 
 import { DataStoreKeys, BotName } from "../core/constants";
 import { Utility } from "../core/Utility";
@@ -25,8 +26,11 @@ export class MessageHandler
      * Handle incoming Discord message.
      * @param {Discord.Message} message discord.js message instance.
      */
-    public handleMsg(message: Discord.Message)
+    public async handleMsg(message: Discord.Message)
     {
+        // Ignore DMs.
+        if (!message.guild) return;
+
         // If the message wasn't sent in a whitelisted channel, don't bother doing anything else.
         const whitelist: string[] = this._dataStore.get(DataStoreKeys.Whitelist);
         if (!whitelist.some(x => x === message.channel.id))
@@ -35,11 +39,27 @@ export class MessageHandler
         }
 
         const normalizedContent: string = message.content.toLowerCase();
-        if (normalizedContent === "hi heraldbot!")
+
+        // Check if voice channel join request.
+        if (normalizedContent === "hb join me")
+        {
+            if (message.member.voiceChannel)
+            {
+                //const connection: Discord.VoiceConnection = await message.member.voiceChannel.join();
+                new nodespeak()
+                    .text("hello i am heraldbot")
+                    .voice("Dave")
+                    .render("heraldbot.wav");
+                
+                //connection.playStream(url as any);
+            }
+
+            return;
+        }
+        else if (normalizedContent === "hi heraldbot!")
         {
             // If someone is greeting heraldbot.
-            const guildMember: Discord.GuildMember = message.guild.members.find(x => x.id === message.author.id);
-            message.channel.send("hi " +  guildMember.displayName.toLowerCase() + "!");
+            message.channel.send("hi " +  message.member.displayName.toLowerCase() + "!");
 
             return;
         }
