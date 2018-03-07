@@ -113,6 +113,7 @@ export class Heraldbot
         // Upon successful Discord connection.
         this._botClient.on('ready', () =>
         {
+            this._botClient.user.setActivity("YOU", { type: "WATCHING"});
             Winston.log("debug", "Connected to Discord.");
         });
 
