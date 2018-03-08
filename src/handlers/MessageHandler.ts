@@ -1,6 +1,8 @@
 import * as Discord from "discord.js";
 import * as Winston from "winston";
-import nodespeak = require("nodespeak");
+import * as path from "path";
+import fs = require("fs");
+import child_process = require("child_process");
 
 import { DataStoreKeys, BotName } from "../core/constants";
 import { Utility } from "../core/Utility";
@@ -45,13 +47,23 @@ export class MessageHandler
         {
             if (message.member.voiceChannel)
             {
-                //const connection: Discord.VoiceConnection = await message.member.voiceChannel.join();
-                new nodespeak()
-                    .text("hello i am heraldbot")
-                    .voice("Dave")
-                    .render("heraldbot.wav");
-                
-                //connection.playStream(url as any);
+                const connection: Discord.VoiceConnection = await message.member.voiceChannel.join();
+                const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
+                const randomPhrase: string = corpus[Utility.randomNumber(0, corpus.length)];
+                Winston.log("info", "random phrase: " + randomPhrase);
+
+                const assetsPath: string = path.resolve(__dirname, "../../assets");
+                const child: any = child_process.spawn("powershell.exe", [path.join(assetsPath, "ps/voice.ps1") + " -p \"" + randomPhrase + "\""]);
+
+                child.stderr.on("data", data => Winston.error("Powershell Errors: " + data));
+
+                child.stdout.on("data", data => Winston.info("[POWERSHELL] " + data));
+
+                child.on("exit", () => {
+                    Winston.log("info", "On child process exit");
+                    const d: Discord.StreamDispatcher = connection.playFile(path.join(assetsPath, "hb.wav"));
+                    d.addListener("end", () => connection.disconnect());
+                });
             }
 
             return;
