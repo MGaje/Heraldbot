@@ -1,9 +1,11 @@
 import * as Discord from "discord.js";
 import * as Winston from "winston";
+import pirateSpeak = require("pirate-speak");
 
 import { DataStoreKeys, BotName } from "../core/constants";
 import { Utility } from "../core/Utility";
 import { DataStore } from "../core/DataStore";
+import { BotMessage } from "../classes/BotMessage";
 
 /**
  * Handles Discord messages from users.
@@ -23,30 +25,36 @@ export class MessageHandler
 
     /**
      * Handle incoming Discord message.
-     * @param {Discord.Message} message discord.js message instance.
+     * @param {BotMessage} message A message that the bot has received from Discord with additional metadata.
      */
-    public handleMsg(message: Discord.Message)
+    public handleMsg(message: BotMessage)
     {
         // If the message wasn't sent in a whitelisted channel, don't bother doing anything else.
         const whitelist: string[] = this._dataStore.get(DataStoreKeys.Whitelist);
-        if (!whitelist.some(x => x === message.channel.id))
+        if (!whitelist.some(x => x === message.getDiscordMessage().channel.id))
         {
             return;
         }
 
-        const normalizedContent: string = message.content.toLowerCase();
+        const normalizedContent: string = message.getDiscordMessage().content.toLowerCase();
         if (normalizedContent === "hi heraldbot!")
         {
             // If someone is greeting heraldbot.
-            const guildMember: Discord.GuildMember = message.guild.members.find(x => x.id === message.author.id);
-            message.channel.send("hi " +  guildMember.displayName.toLowerCase() + "!");
+            const guildMember: Discord.GuildMember = message.getDiscordMessage().guild.members.find(x => x.id === message.getDiscordMessage().author.id);
+            let greeting: string = "hi " +  guildMember.displayName.toLowerCase() + "!"
+            if (message.isPirateModeEnabled())
+            {
+                greeting = pirateSpeak.translate(greeting);
+            }
+
+            message.getDiscordMessage().channel.send(greeting);
 
             return;
         }
-        else if (message.content.toLowerCase().includes(BotName))
+        else if (normalizedContent.includes(BotName))
         {
             // If someone directly mentions heraldbot.
-            this.sayRandomPhrase(message.channel as Discord.TextChannel);
+            this.sayRandomPhrase(message);
             
             return;
         }
@@ -61,7 +69,7 @@ export class MessageHandler
         if (chance === 1)
         {
             // HeraldBot speaks!
-            this.sayRandomPhrase(message.channel as Discord.TextChannel);
+            this.sayRandomPhrase(message);
         }
         else
         {
@@ -70,28 +78,33 @@ export class MessageHandler
             const absorbPer: number = Math.round(100 * (1 / 4));
             Winston.log("debug", "Absorb chance: " + absorbChance + " (about " + absorbPer + "%).");
 
-            if (message.content.length > 0 && absorbChance === 1)
+            if (message.getDiscordMessage().content.length > 0 && absorbChance === 1)
             {
-                this.absorbPhrase(message.content);
+                this.absorbPhrase(message.getDiscordMessage().content);
             }
         }        
     }
 
     /**
      * Say a random phrase in the specified channel.
-     * @param {Discord.TextChannel} channel The Discord channel to say a random phrase in.
+     * @param {BotMessage} message The message from Discord the bot has received.
      */
-    private sayRandomPhrase(channel: Discord.TextChannel)
+    private sayRandomPhrase(message: BotMessage)
     {
         const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
         let randomPhrase: string = corpus[Utility.randomNumber(0, corpus.length)];
+
+        if (message.isPirateModeEnabled())
+        {
+            randomPhrase = pirateSpeak.translate(randomPhrase);
+        }
 
         if (Utility.randomNumber(1, 11) === 1)
         {
             randomPhrase = randomPhrase.toUpperCase();
         }
 
-        channel.send(randomPhrase);
+        message.getDiscordMessage().channel.send(randomPhrase);
     }
 
     /**

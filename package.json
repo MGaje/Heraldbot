@@ -11,6 +11,7 @@
   "dependencies": {
     "discord.js": "^11.3.0",
     "mersenne-twister": "^1.1.0",
+    "pirate-speak": "^1.0.1",
     "winston": "^2.4.0"
   },
   "devDependencies": {

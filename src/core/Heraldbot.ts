@@ -9,6 +9,7 @@ import { Config } from "./Config";
 import { MessageHandler } from "../handlers/MessageHandler";
 import { DataStore } from "./DataStore";
 import { Utility } from "./Utility";
+import { BotMessage } from "../classes/BotMessage";
 
 /**
  * Main bot construct.
@@ -21,6 +22,7 @@ export class Heraldbot
     private _msgHandler: MessageHandler;
     private _dataStore: DataStore;
     private _activityTarget: string;
+    private _pirateMode: boolean;
 
     /**
      * Default constructor.
@@ -32,6 +34,7 @@ export class Heraldbot
         this._dataStore = new DataStore();
         this._config = require("../../config.json");
         this._activityTarget = "YOU";
+        this._pirateMode = false;
     }
 
     /**
@@ -124,8 +127,8 @@ export class Heraldbot
         {
             // Ignore messages from itself.
             if (message.author.id === BotId) return;
-            
-            this._msgHandler.handleMsg(message);
+
+            this._msgHandler.handleMsg(new BotMessage(message, this._pirateMode));
         });
 
         // Upon user interaction.
@@ -169,6 +172,12 @@ export class Heraldbot
                 parsedInput.shift();
                 this._activityTarget = parsedInput.join(" ");
                 this._botClient.user.setActivity(this._activityTarget, { type: "WATCHING"});
+            }
+            // Toggle pirate mode. Arr!
+            else if (input.startsWith("toggle-pirate"))
+            {
+                this._pirateMode = !this._pirateMode;
+                Winston.info("Pirate mode toggled: " + this._pirateMode.toString());
             }
         });
     }
