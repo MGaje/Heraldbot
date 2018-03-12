@@ -20,6 +20,7 @@ export class Heraldbot
     private _stdin: NodeJS.Socket;
     private _msgHandler: MessageHandler;
     private _dataStore: DataStore;
+    private _activityTarget: string;
 
     /**
      * Default constructor.
@@ -30,6 +31,7 @@ export class Heraldbot
         this._botClient = new Discord.Client();
         this._dataStore = new DataStore();
         this._config = require("../../config.json");
+        this._activityTarget = "YOU";
     }
 
     /**
@@ -159,6 +161,14 @@ export class Heraldbot
             else if (input.startsWith("update-corpus"))
             {
                 this.updateCorpusFile();
+            }
+            // Change activity target.
+            else if (input.startsWith("update-activity-target"))
+            {
+                const parsedInput: string[] = input.split(" ");
+                parsedInput.shift();
+                this._activityTarget = parsedInput.join(" ");
+                this._botClient.user.setActivity(this._activityTarget, { type: "WATCHING"});
             }
         });
     }
