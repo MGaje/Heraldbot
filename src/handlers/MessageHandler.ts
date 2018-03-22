@@ -78,7 +78,7 @@ export class MessageHandler
             const absorbPer: number = Math.round(100 * (1 / 4));
             Winston.log("debug", "Absorb chance: " + absorbChance + " (about " + absorbPer + "%).");
 
-            if (message.getDiscordMessage().content.length > 0 && absorbChance === 1)
+            if (absorbChance === 1 && message.getDiscordMessage().content.length > 0 && message.getDiscordMessage().content.length <= 150)
             {
                 this.absorbPhrase(message.getDiscordMessage().content);
             }
