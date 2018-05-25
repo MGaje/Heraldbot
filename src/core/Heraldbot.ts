@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 
 import * as Discord from "discord.js";
-import * as Winston from "winston";
 
 import { BotId, DataStoreKeys } from "./constants";
 import { Config } from "./Config";
@@ -42,23 +41,23 @@ export class Heraldbot
      */
     public async run(): Promise<void>
     {
-        Winston.log("debug", "Caching data.");
+        console.log("Caching data.");
         await this.cacheData();
 
-        Winston.log("debug", "Setting up handlers.");
+        console.log("Setting up handlers.");
         this.setupHandlers();
         
-        Winston.log("debug", "Setting up event listeners.");
+        console.log("Setting up event listeners.");
         this.setupListeners();
 
-        Winston.log("debug", "Attempting to login.");
+        console.log("Attempting to login.");
         await this._botClient.login(this._config.botToken);
 
-        Winston.log("debug", "Heraldbot is now running.");
+        console.log("Heraldbot is now running.");
 
         // Rewrite corpus file every hour.
         setInterval(this.updateCorpusFile.bind(this), 3600000);
-        Winston.log("debug", "UpdateCorpusFile interval running."); 
+        console.log( "UpdateCorpusFile interval running."); 
     }
 
     /** 
@@ -72,12 +71,12 @@ export class Heraldbot
         // Read corpus file.
         const parsedContents: string[] = (await Utility.readFile(path.join(__dirname, "../../assets/corpus.txt"))).split("\n");
         this._dataStore.set(DataStoreKeys.Corpus, parsedContents);
-        Winston.log("debug", "Parsed corpus file.");
+        console.log("Parsed corpus file.");
         
         // Read whitelist file.
         const parsedWhitelist: string[] = (await Utility.readFile(path.join(__dirname, "../../assets/whitelist.txt"))).split("\n").map(x => x.trim());
         this._dataStore.set(DataStoreKeys.Whitelist, parsedWhitelist);
-        Winston.log("debug", "Parsed whitelist file.");
+        console.log("Parsed whitelist file.");
     }
 
     /** 
@@ -92,10 +91,10 @@ export class Heraldbot
         {
             if (err)
             {
-                Winston.log("error", "An error occurred writing the corpus file.");
+                console.error("An error occurred writing the corpus file.");
             }
 
-            Winston.log("debug", "Corpus file written.");
+            console.log("Corpus file written.");
         });
     }
 
@@ -104,7 +103,7 @@ export class Heraldbot
      */
     private setupHandlers()
     {
-        Winston.log("debug", "Setting up Message Handler.");
+        console.log("Setting up Message Handler.");
         this._msgHandler = new MessageHandler(this._dataStore);
     }
     
@@ -119,7 +118,7 @@ export class Heraldbot
         this._botClient.on('ready', () =>
         {
             this._botClient.user.setActivity("YOU", { type: "WATCHING"});
-            Winston.log("debug", "Connected to Discord.");
+            console.log("Connected to Discord.");
         });
 
         // Upon Discord server message.
@@ -152,13 +151,13 @@ export class Heraldbot
                 const parsedInput: string[] = input.split(" ");
                 this._dataStore.set(DataStoreKeys.Chance, parseInt(parsedInput[1]));
                 
-                Winston.log("debug", "Updated chance value to " + parsedInput[1]);
+                console.log("Updated chance value to " + parsedInput[1]);
             }
             // Obtain current number of phrases in corpus.
             else if (input.startsWith("count"))
             {
                 const corpusContents: string[] = this._dataStore.get(DataStoreKeys.Corpus);
-                Winston.log("debug", "Phrase count: " + corpusContents.length);
+                console.log("Phrase count: " + corpusContents.length);
             }
             // Manually update corpus file.
             else if (input.startsWith("update-corpus"))
@@ -177,7 +176,7 @@ export class Heraldbot
             else if (input.startsWith("toggle-pirate"))
             {
                 this._pirateMode = !this._pirateMode;
-                Winston.info("Pirate mode toggled: " + this._pirateMode.toString());
+                console.log("Pirate mode toggled: " + this._pirateMode.toString());
             }
         });
     }

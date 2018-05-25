@@ -1,5 +1,4 @@
 import * as Discord from "discord.js";
-import * as Winston from "winston";
 import pirateSpeak = require("pirate-speak");
 
 import { DataStoreKeys, BotName } from "../core/constants";
@@ -64,7 +63,7 @@ export class MessageHandler
         const chance: number = Utility.randomNumber(1, chanceBound);
         const chancePer: number = Math.round(100 * (1 / (chanceBound - 1)));
 
-        Winston.log("debug", "Chance: " + chance + " (about " + chancePer + "%).");
+        console.log("Chance: " + chance + " (about " + chancePer + "%).");
 
         if (chance === 1)
         {
@@ -76,7 +75,7 @@ export class MessageHandler
             // Potentially absorb new phrase.
             const absorbChance: number = Utility.randomNumber(1, 5);
             const absorbPer: number = Math.round(100 * (1 / 4));
-            Winston.log("debug", "Absorb chance: " + absorbChance + " (about " + absorbPer + "%).");
+            console.log("Absorb chance: " + absorbChance + " (about " + absorbPer + "%).");
 
             if (absorbChance === 1 && message.getDiscordMessage().content.length > 0 && message.getDiscordMessage().content.length <= 150)
             {
@@ -119,7 +118,7 @@ export class MessageHandler
         {
             corpusContents.push(phrase);
             this._dataStore.set(DataStoreKeys.Corpus, corpusContents);
-            Winston.log("debug", "Absorbed new phrase: " + phrase);
+            console.log("Absorbed new phrase: " + phrase);
         }
     }
 }
