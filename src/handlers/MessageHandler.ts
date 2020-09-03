@@ -91,7 +91,9 @@ export class MessageHandler
     private sayRandomPhrase(message: BotMessage)
     {
         const corpus: string[] = this._dataStore.get(DataStoreKeys.Corpus);
-        let randomPhrase: string = corpus[Utility.randomNumber(0, corpus.length)];
+        const rNum: number = Utility.randomNumber(0, corpus.length);
+
+        let randomPhrase: string = corpus[rNum];
 
         if (message.isPirateModeEnabled())
         {

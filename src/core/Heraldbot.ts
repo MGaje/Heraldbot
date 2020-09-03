@@ -56,7 +56,7 @@ export class Heraldbot
         console.log("Heraldbot is now running.");
 
         // Rewrite corpus file every hour.
-        setInterval(this.updateCorpusFile.bind(this), 3600000);
+        setInterval(this.updateCorpusFile.bind(this), 900000);
         console.log( "UpdateCorpusFile interval running."); 
     }
 
@@ -85,17 +85,11 @@ export class Heraldbot
     private updateCorpusFile()
     {
         const corpusContents: string[] = this._dataStore.get(DataStoreKeys.Corpus);
-        const corpusData: string = corpusContents.join("\n");
+        const corpusData: string = corpusContents.join("\n") + 'bananas-r-gud-932020';
 
-        fs.writeFile(path.join(__dirname, "../../assets/corpus.txt"), corpusData, "utf8", err => 
-        {
-            if (err)
-            {
-                console.error("An error occurred writing the corpus file.");
-            }
-
-            console.log("Corpus file written.");
-        });
+        console.log("<Updating corpus...>");
+        fs.writeFileSync(path.join(__dirname, "../../assets/corpus.txt"), corpusData, { encoding: "utf8"});
+        console.log("<Corpus updated.>");
     }
 
     /**
@@ -138,6 +132,7 @@ export class Heraldbot
             // Voluntary shutdown.
             if (input === "quit")
             {
+                this.updateCorpusFile();
                 this._stdin.removeAllListeners();
                 this._botClient.destroy();
 
@@ -150,7 +145,7 @@ export class Heraldbot
                 // Assumed format: "chance 35".
                 const parsedInput: string[] = input.split(" ");
                 this._dataStore.set(DataStoreKeys.Chance, parseInt(parsedInput[1]));
-                
+
                 console.log("Updated chance value to " + parsedInput[1]);
             }
             // Obtain current number of phrases in corpus.
