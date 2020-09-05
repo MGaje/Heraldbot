@@ -85,7 +85,7 @@ export class Heraldbot
     private updateCorpusFile()
     {
         const corpusContents: string[] = this._dataStore.get(DataStoreKeys.Corpus);
-        const corpusData: string = corpusContents.join("\n") + 'bananas-r-gud-932020';
+        const corpusData: string = corpusContents.join("\n");
 
         console.log("<Updating corpus...>");
         fs.writeFileSync(path.join(__dirname, "../../assets/corpus.txt"), corpusData, { encoding: "utf8"});
